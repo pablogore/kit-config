@@ -38,24 +38,38 @@
 #![warn(clippy::all, clippy::pedantic, clippy::nursery)]
 #![deny(clippy::cargo)]
 
+#[cfg(feature = "config-core")]
 pub use config_core::errors;
+#[cfg(feature = "config-core")]
 pub use config_core::validation;
+#[cfg(feature = "config-core")]
 pub use config_core::profile;
+#[cfg(feature = "config-core")]
 pub use config_core::extension;
 
+#[cfg(feature = "config-loaders")]
 pub use config_loaders::loader;
+#[cfg(feature = "config-loaders")]
 pub use config_loaders::cloud;
 
+#[cfg(feature = "config-core")]
 pub mod sources;
+#[cfg(feature = "config-core")]
 pub mod modules;
 
+#[cfg(feature = "config-core")]
 pub use config_core::{ConfigError, ConfigurationSource, ConfigurationProfile};
+#[cfg(feature = "config-core")]
 pub use config_core::{Validation, ValidationReport, ValidationError};
+#[cfg(feature = "config-core")]
 pub use config_core::{ConfigModule, Extension};
 
+#[cfg(feature = "config-loaders")]
 pub use config_loaders::loader::ConfigLoader;
+#[cfg(feature = "config-loaders")]
 pub use config_loaders::cloud::{AwsSource, DigitalOceanSource, GcpSource};
 
+#[cfg(feature = "config-models")]
 pub use config_models::logging::{
     LoggingConfig, LogLevel, LogFormat, OutputTarget, OutputConfig,
     TimestampConfig, TimestampFormat, CorrelationConfig, StructuredConfig,

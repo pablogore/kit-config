@@ -6,6 +6,34 @@ A flexible, multi-source configuration loading library for Rust applications.
 
 Kit Config provides a robust solution for loading configuration from multiple sources with a clean, extensible API. It supports various configuration sources including environment variables, dotenv files, key-value maps, cloud provider configurations, and a comprehensive provider-agnostic logging configuration model.
 
+## Architecture
+
+Kit Config is a Rust workspace composed of four crates with clear ownership boundaries:
+
+| Crate | Role | Depends On |
+|-------|------|------------|
+| `kit-config` | Public facade (re-exports everything) | all crates |
+| `config-core` | Traits, errors, validation framework | — |
+| `config-models` | Pure configuration data structures | `config-core` |
+| `config-loaders` | Source loading, parsing, merging | `config-core` |
+
+For most users, depending on `kit-config` is sufficient — it re-exports the full public API:
+
+```toml
+[dependencies]
+kit-config = "0.1"
+```
+
+Ecosystem crates (e.g. kit-logger, ego-rs, atlas) can depend on individual crates for more targeted dependencies:
+
+```toml
+[dependencies]
+config-core = { path = "crates/config-core" }
+config-models = { path = "crates/config-models" }
+```
+
+This avoids pulling in loading infrastructure when only the configuration contracts are needed.
+
 ## Key Features
 
 - **Multi-source loading**: Load configuration from multiple sources with deterministic precedence

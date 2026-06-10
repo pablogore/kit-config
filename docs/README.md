@@ -2,6 +2,54 @@
 
 A flexible, multi-source configuration loading library for Rust applications with a provider-agnostic architecture.
 
+## Workspace Architecture
+
+Kit Config is organized as a Rust workspace with four crates:
+
+```text
+kit-config/                    (workspace root)
+└── crates/
+    ├── config-core/           traits, errors, validation framework
+    ├── config-models/         pure data structures (logging, infra)
+    ├── config-loaders/        source loading, parsing, merging
+    └── kit-config/            public facade (re-exports all)
+```
+
+**Dependency rules:**
+- `config-models` → `config-core`
+- `config-loaders` → `config-core`
+- `kit-config` → all crates
+
+### When to use each crate
+
+| Use case | Crate |
+|----------|-------|
+| Application configuration loading | `kit-config` |
+| Implementing a custom config source | `config-core` (for `ConfigurationSource` trait) |
+| Defining a new configuration module | `config-models` + `config-core` |
+| Validation-only dependency | `config-core` (for `Validation`, `ValidationReport`) |
+
+### End users (recommended)
+
+```toml
+[dependencies]
+kit-config = "0.1"
+```
+
+All public types are re-exported through the facade. No need to track internal crate boundaries.
+
+### Ecosystem crates
+
+For crates that only need configuration contracts (e.g. kit-logger, ego-rs):
+
+```toml
+[dependencies]
+config-models = "0.1"
+config-core = "0.1"
+```
+
+This avoids pulling in file I/O and environment dependencies from `config-loaders`.
+
 ## Key Features
 
 - **Multi-source loading**: Load configuration from multiple sources with deterministic precedence

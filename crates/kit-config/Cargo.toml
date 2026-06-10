@@ -3,10 +3,16 @@ name = "kit-config"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+default = ["config-core", "config-models", "config-loaders"]
+config-core = ["dep:config-core"]
+config-models = ["dep:config-models", "config-core"]
+config-loaders = ["dep:config-loaders", "config-core"]
+
 [dependencies]
-config-core = { path = "../config-core" }
-config-models = { path = "../config-models" }
-config-loaders = { path = "../config-loaders" }
+config-core = { path = "../config-core", optional = true }
+config-models = { path = "../config-models", optional = true }
+config-loaders = { path = "../config-loaders", optional = true }
 
 [dev-dependencies]
 tempfile = "3.0"
