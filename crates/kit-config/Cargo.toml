@@ -1,0 +1,13 @@
+[package]
+name = "kit-config"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+config-core = { path = "../config-core" }
+config-models = { path = "../config-models" }
+config-loaders = { path = "../config-loaders" }
+
+[dev-dependencies]
+tempfile = "3.0"
+serde_json = "1.0"

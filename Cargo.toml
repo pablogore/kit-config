@@ -1,24 +1,8 @@
-[package]
-name = "kit-config"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-config = "0.14"
-dotenvy = "0.15"
-validator = { version = "0.18", features = ["derive"] }
-thiserror = "2.0"
-anyhow = "1.0"
-toml = "0.8"
-tempfile = { version = "3.0", optional = true }
-
-[features]
-default = []
-test-utils = ["tempfile"]
-
-[dev-dependencies]
-tempfile = "3.0"
-pretty_assertions = "1.4"
-serde_yaml = "0.9"
+[workspace]
+resolver = "2"
+members = [
+    "crates/config-core",
+    "crates/config-models",
+    "crates/config-loaders",
+    "crates/kit-config",
+]
