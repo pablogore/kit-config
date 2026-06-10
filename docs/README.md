@@ -36,19 +36,26 @@ kit-config/                    (workspace root)
 kit-config = "0.1"
 ```
 
-All public types are re-exported through the facade. No need to track internal crate boundaries.
+Default features include everything. All public types are re-exported through the facade. No need to track internal crate boundaries.
 
-### Ecosystem crates
+### Ecosystem crates (selective imports)
 
-For crates that only need configuration contracts (e.g. kit-logger, ego-rs):
+For crates that only need configuration contracts (e.g. kit-logger, ego-rs), disable default features and enable only what you need:
 
 ```toml
 [dependencies]
-config-models = "0.1"
-config-core = "0.1"
+kit-config = { version = "0.1", default-features = false, features = ["config-core", "config-models"] }
 ```
 
-This avoids pulling in file I/O and environment dependencies from `config-loaders`.
+This avoids pulling in file I/O, environment parsing, and `toml` dependencies from `config-loaders`.
+
+### Feature reference
+
+| Feature | Provides | Implies |
+|---------|----------|---------|
+| `config-core` | `ConfigError`, `Validation`, `ConfigurationSource`, `ConfigModule`, `ConfigurationProfile` | — |
+| `config-models` | `LoggingConfig`, infra modules (`GrpcModule`, `HttpModule`, etc.) | `config-core` |
+| `config-loaders` | `ConfigLoader`, sources (TOML, dotenv, env, cloud), `AwsSource`, `GcpSource` | `config-core` |
 
 ## Key Features
 

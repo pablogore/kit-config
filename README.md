@@ -17,22 +17,29 @@ Kit Config is a Rust workspace composed of four crates with clear ownership boun
 | `config-models` | Pure configuration data structures | `config-core` |
 | `config-loaders` | Source loading, parsing, merging | `config-core` |
 
-For most users, depending on `kit-config` is sufficient — it re-exports the full public API:
+For most users, depending on `kit-config` with default features is sufficient — it re-exports the full public API:
 
 ```toml
 [dependencies]
 kit-config = "0.1"
 ```
 
-Ecosystem crates (e.g. kit-logger, ego-rs, atlas) can depend on individual crates for more targeted dependencies:
+Ecosystem crates (e.g. kit-logger, ego-rs, atlas) can select only the crates they need via feature flags, avoiding unnecessary dependencies:
 
 ```toml
 [dependencies]
-config-core = { path = "crates/config-core" }
-config-models = { path = "crates/config-models" }
+kit-config = { version = "0.1", default-features = false, features = ["config-core", "config-models"] }
 ```
 
-This avoids pulling in loading infrastructure when only the configuration contracts are needed.
+### Feature flags
+
+| Feature | Provides | Implies |
+|---------|----------|---------|
+| `config-core` (default) | traits, errors, validation framework | — |
+| `config-models` (default) | logging, infra configuration models | `config-core` |
+| `config-loaders` (default) | source loading, parsing, cloud providers | `config-core` |
+
+Omitting `config-loaders` removes file I/O, environment parsing, and `toml` dependencies — useful when only the configuration contracts are needed.
 
 ## Key Features
 
