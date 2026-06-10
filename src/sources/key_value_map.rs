@@ -20,7 +20,7 @@ impl KeyValueMapSource {
     /// Creates a new key-value map source
     pub fn new(prefix: &str, map_str: &str, optional: bool) -> Self {
         Self {
-            prefix: prefix.to_lowercase(),
+            prefix: prefix.to_string(),
             map_str: map_str.to_string(),
             optional,
         }
@@ -52,7 +52,7 @@ impl ConfigurationSource for KeyValueMapSource {
                 }
                 
                 if let Some((key, value)) = trimmed_pair.split_once('=') {
-                    let key = format!("{}.{}", self.prefix, key.trim().to_lowercase());
+                    let key = format!("{}.{}", self.prefix, key.trim());
                     let value = value.trim();
                     
                     // Try to parse as JSON for better type handling

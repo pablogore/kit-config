@@ -61,3 +61,10 @@ pub use sources::ConfigurationSource;
 pub use profile::ConfigurationProfile;
 pub use validation::{ValidationReport, ValidationError};
 pub use cloud::{AwsSource, DigitalOceanSource, GcpSource};
+
+pub use modules::logging::{
+    LoggingConfig, LogLevel, LogFormat, OutputTarget, OutputConfig,
+    TimestampConfig, TimestampFormat, CorrelationConfig, StructuredConfig,
+    RedactionConfig, SamplingConfig, SamplingStrategy, BufferingConfig,
+    RotationConfig, RetentionConfig, CategoryConfig, CategoriesConfig,
+};

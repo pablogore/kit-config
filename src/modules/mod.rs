@@ -99,3 +99,4 @@ pub trait Extension {
 }
 
 pub mod infra;
+pub mod logging;

@@ -1,10 +1,6 @@
 # Kit Config
 
-A flexible, multi-source configuration loading library for Rust applications.
-
-## Overview
-
-Kit Config provides a robust solution for loading configuration from multiple sources with a clean, extensible API. It supports various configuration sources including environment variables, dotenv files, key-value maps, and cloud provider configurations.
+A flexible, multi-source configuration loading library for Rust applications with a provider-agnostic architecture.
 
 ## Key Features
 
@@ -13,40 +9,43 @@ Kit Config provides a robust solution for loading configuration from multiple so
 - **Cloud provider integration**: Native support for AWS, GCP, and DigitalOcean configurations
 - **Flexible key-value maps**: Support for structured configuration data
 - **Default values**: Set sensible defaults that can be overridden
+- **Logging configuration**: Comprehensive, strongly-typed, provider-agnostic logging config
 - **Type-safe**: Built with Rust's type system for compile-time safety
 
 ## Getting Started
 
-### Installation
-
-Add to your `Cargo.toml`:
-
-```toml
-[dependencies]
-kit-config = "0.1"
-```
-
-### Basic Usage
-
 ```rust
-use kit_config::{ConfigLoader, ConfigurationSource};
+use kit_config::loader::ConfigLoader;
 
 let config = ConfigLoader::builder()
-    .add_source(kit_config::sources::DotenvSource::new())
-    .add_source(kit_config::sources::EnvironmentSource::new())
-    .build();
+    .add_defaults()
+    .add_toml("config.toml")
+    .add_environment()
+    .build()
+    .unwrap();
+```
 
-let value = config.get("MY_CONFIG_KEY").unwrap();
+### Logging Configuration
+
+```rust
+use kit_config::loader::ConfigLoader;
+use kit_config::modules::logging::LoggingConfig;
+
+let config: LoggingConfig = ConfigLoader::builder()
+    .add_defaults()
+    .build()
+    .unwrap()
+    .load_and_validate()
+    .unwrap();
+
+println!("Log level: {:?}", config.level);
 ```
 
 ## Documentation
 
-For comprehensive documentation, please see the [Kit Config documentation](./docs/README.md).
-
-## Use Cases
-
-This library is ideal for:
-- Application configuration management
-- Cloud-native application deployment
-- Multi-environment configuration handling
-- Structured configuration with fallback mechanisms
+- [Basic Usage](./docs/defaults.md) — Default values and basic configuration
+- [Sources](./docs/sources.md) — All available configuration sources
+- [Cloud Providers](./docs/cloud.md) — AWS, GCP, and DigitalOcean configuration
+- [Key-Value Maps](./docs/key_value_maps.md) — Structured key-value configuration
+- **Logging Configuration** — [Full reference](./logging.md)
+- [Extending the Framework](./docs/extending.md) — Custom sources and modules

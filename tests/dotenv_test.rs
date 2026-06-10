@@ -25,6 +25,7 @@ mod tests {
         assert!(result.is_ok());
         let config = result.unwrap();
         
+        // With the fix, keys should preserve their original case
         assert_eq!(config.get("TEST_KEY"), Some(&Value::String("TEST_VALUE".to_string())));
         assert_eq!(config.get("ANOTHER_KEY"), Some(&Value::String("another_value".to_string())));
     }

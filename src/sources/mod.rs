@@ -91,8 +91,8 @@ impl ConfigurationSource for EnvironmentSource {
             // If prefix is set, only load variables with that prefix
             if let Some(ref prefix) = self.prefix {
                 if key.starts_with(prefix) {
-                    let config_key = key[prefix.len()..].to_lowercase();
-                    config.insert(config_key, Value::String(value));
+                    let config_key = &key[prefix.len()..].to_lowercase();
+                    config.insert(config_key.to_string(), Value::String(value));
                 }
             } else {
                 // No prefix, load all environment variables
@@ -151,6 +151,7 @@ impl ConfigurationSource for DotenvSource {
                     if let Some((key, value)) = line.split_once('=') {
                         let key = key.trim();
                         let value = value.trim().trim_matches('"');
+                        // Preserve original case of keys (fix for the issue)
                         config.insert(key.to_string(), Value::String(value.to_string()));
                     }
                 }

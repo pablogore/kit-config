@@ -4,7 +4,7 @@ A flexible, multi-source configuration loading library for Rust applications.
 
 ## Overview
 
-Kit Config provides a robust solution for loading configuration from multiple sources with a clean, extensible API. It supports various configuration sources including environment variables, dotenv files, key-value maps, and cloud provider configurations.
+Kit Config provides a robust solution for loading configuration from multiple sources with a clean, extensible API. It supports various configuration sources including environment variables, dotenv files, key-value maps, cloud provider configurations, and a comprehensive provider-agnostic logging configuration model.
 
 ## Key Features
 
@@ -13,6 +13,7 @@ Kit Config provides a robust solution for loading configuration from multiple so
 - **Cloud provider integration**: Native support for AWS, GCP, and DigitalOcean configurations
 - **Flexible key-value maps**: Support for structured configuration data
 - **Type-safe**: Built with Rust's type system for compile-time safety
+- **Logging configuration**: Fully typed, provider-agnostic logging config with support for levels, formats, outputs, sampling, buffering, rotation, retention, redaction, and per-module overrides
 
 ## Getting Started
 
@@ -28,19 +29,60 @@ kit-config = "0.1"
 ### Basic Usage
 
 ```rust
-use kit_config::{ConfigLoader, ConfigurationSource};
+use kit_config::loader::ConfigLoader;
 
 let config = ConfigLoader::builder()
-    .add_source(kit_config::sources::DotenvSource::new())
-    .add_source(kit_config::sources::EnvironmentSource::new())
-    .build();
+    .add_defaults()
+    .add_toml("config.toml")
+    .add_environment()
+    .build()
+    .unwrap();
+```
 
-let value = config.get("MY_CONFIG_KEY").unwrap();
+### Logging Configuration
+
+```rust
+use kit_config::loader::ConfigLoader;
+use kit_config::modules::logging::LoggingConfig;
+
+let config: LoggingConfig = ConfigLoader::builder()
+    .add_defaults()
+    .build()
+    .unwrap()
+    .load_and_validate()
+    .unwrap();
+```
+
+### YAML Logging Example
+
+```yaml
+logging:
+  enabled: true
+  level: info
+  format: json
+  output:
+    targets:
+      - console
+      - stderr
+  sampling:
+    enabled: true
+    strategy: probabilistic
+    rate: 0.10
+  overrides:
+    ego_runtime: debug
+    sqlx: warn
+  categories:
+    audit:
+      enabled: true
+    security:
+      enabled: true
+    metrics:
+      enabled: false
 ```
 
 ## Documentation
 
-For comprehensive documentation, please see the [Kit Config documentation](./docs/README.md).
+For comprehensive documentation, see the [docs](./docs/README.md).
 
 ## Use Cases
 
@@ -49,3 +91,4 @@ This library is ideal for:
 - Cloud-native application deployment
 - Multi-environment configuration handling
 - Structured configuration with fallback mechanisms
+- Provider-agnostic logging configuration
