@@ -32,9 +32,9 @@ models and define only domain-specific configuration.
 - TOML support
 - Configuration validation
 - Environment profiles
-- Reusable infrastructure configuration models
-- Reusable observability configuration models
-- Reusable runtime configuration models
+- Reusable infrastructure configuration modules (model + defaults + validation)
+- Reusable observability configuration modules (model + defaults + validation)
+- Reusable runtime configuration modules (model + defaults + validation)
 - Framework-level validation
 - Application-level validation
 - Extensible validation pipeline
@@ -230,77 +230,77 @@ are reported, with framework errors first.
 
 ---
 
-### User Story 8 - Infrastructure Configuration Models (Priority: P8)
+### User Story 8 - Infrastructure Configuration Modules (Priority: P8)
 
 As a framework maintainer, I want reusable infrastructure configuration
-structures so that all ecosystem projects share identical configuration
+modules so that all ecosystem projects share identical configuration
 definitions.
 
-**Why this priority**: Shared models eliminate duplication and divergence
+**Why this priority**: Shared modules eliminate duplication and divergence
 across projects. Every project that needs an HTTP server currently redefines
 port, host, TLS settings — this stops that pattern.
 
-**Independent Test**: Define an `HttpConfig` with host, port, and TLS settings.
+**Independent Test**: Use `HttpModule` with host, port, and TLS settings.
 Load it from TOML and assert the deserialized struct matches expected values.
-Then use it directly in a consuming project without redefining the struct.
+Then use it directly in a consuming project without redefining any types.
 
 **Acceptance Scenarios**:
 
 1. **Given** a TOML block `[http]\nhost = "0.0.0.0"\nport = 8080`,
-   **When** loaded into `HttpConfig`, **Then** both fields are correctly parsed
-2. **Given** a `PostgresConfig`, **When** loaded, **Then** connection string,
+   **When** loaded via `HttpModule`, **Then** both fields are correctly parsed
+2. **Given** a `PostgresModule`, **When** loaded, **Then** connection string,
    pool size, and SSL mode are available as typed fields
 3. **Given** a consumer project that depends on kit-config, **When** the
-   consumer uses `kit_config::infra::PostgresConfig`, **Then** no redefinition
-   is needed — the struct is ready to use
+   consumer uses `kit_config::infra::PostgresModule`, **Then** no redefinition
+   is needed — the config struct, defaults, validation, and helpers are ready
 
 ---
 
-### User Story 9 - Observability Configuration Models (Priority: P9)
+### User Story 9 - Observability Configuration Modules (Priority: P9)
 
 As a framework maintainer, I want reusable observability configuration
-structures so that all ecosystem projects share identical observability
+modules so that all ecosystem projects share identical observability
 configuration.
 
 **Why this priority**: Observability (logging, metrics, tracing) is
 cross-cutting. Every project needs it, and every project benefits from a
-consistent, validated configuration structure.
+consistent, validated configuration module with built-in defaults.
 
-**Independent Test**: Define a `LoggerConfig` with level, format, and output.
-Load from TOML, assert correct parsing. Then verify the same struct works in
+**Independent Test**: Use `LoggerModule` with level, format, and output.
+Load from TOML, assert correct parsing. Then verify the same module works in
 kit-observability without redefinition.
 
 **Acceptance Scenarios**:
 
 1. **Given** a `[logger]\nlevel = "info"\nformat = "json"` block, **When**
-   loaded into `LoggerConfig`, **Then** all fields parse correctly
-2. **Given** a `MetricsConfig` with an OTLP endpoint, **When** validated,
+   loaded via `LoggerModule`, **Then** all fields parse correctly
+2. **Given** a `MetricsModule` with an OTLP endpoint, **When** validated,
    **Then** the endpoint URL is verified as well-formed
-3. **Given** a `TracingConfig` with sampling rate, **When** loaded,
+3. **Given** a `TracingModule` with sampling rate, **When** loaded,
    **Then** the rate is parsed as a valid ratio (0.0–1.0)
 
 ---
 
-### User Story 10 - Runtime Configuration Models (Priority: P10)
+### User Story 10 - Runtime Configuration Modules (Priority: P10)
 
-As a framework maintainer, I want reusable runtime configuration structures so
+As a framework maintainer, I want reusable runtime configuration modules so
 that operational behavior remains consistent across projects.
 
 **Why this priority**: Runtime patterns (retry, backoff, circuit breaker) are
-repeated across every service. Shared models ensure they behave identically
+repeated across every service. Shared modules ensure they behave identically
 everywhere.
 
-**Independent Test**: Define a `RetryConfig` with max_retries, base_delay, and
+**Independent Test**: Use `RetryModule` with max_retries, base_delay, and
 max_delay. Load from config and assert the computed backoff durations match
 the configured strategy.
 
 **Acceptance Scenarios**:
 
 1. **Given** a `[retry]\nmax_retries = 3\nbase_delay = "1s"` block, **When**
-   loaded into `RetryConfig`, **Then** fields are accessible as typed values
-2. **Given** a `CircuitBreakerConfig` with threshold and reset timeout,
+   loaded via `RetryModule`, **Then** fields are accessible as typed values
+2. **Given** a `CircuitBreakerModule` with threshold and reset timeout,
    **When** validated, **Then** threshold > 0 is enforced
-3. **Given** a `WorkerPoolConfig` with min and max workers, **When**
+3. **Given** a `WorkerPoolModule` with min and max workers, **When**
    validated, **Then** min <= max is enforced
 
 ### Edge Cases
@@ -321,15 +321,17 @@ the configured strategy.
 - **Conflicting overrides**: Last source in precedence wins deterministically
 - **Prefix collisions**: When two prefixes overlap, the more specific prefix
   wins or an error is produced
-- **Unknown fields**: By default unknown fields should produce a warning or
-  error unless explicitly allowed
+- **Unknown fields**: Default behavior is strict — unknown fields cause a
+  startup failure. A per-loader or per-module permissive mode can be opted
+  into for forward compatibility during schema migrations
 - **Multiple profile layers**: Profile-specific config merges on top of base
   config layer by layer
 - **Framework validation failure**: Clear diagnostic identifying the failing
   model and field
 - **Application validation failure**: Clear diagnostic identifying the
   application-specific rule and field
-- **Multiple validation failures**: All failures reported, not just the first
+- **Multiple validation failures**: All failures are collected and reported
+  together, not just the first
 
 Applications must fail deterministically when configuration is invalid.
 
@@ -370,8 +372,8 @@ Applications MAY customize precedence.
 #### Validation
 
 - **FR-014**: System MUST support framework-level validation of reusable
-  configuration models (e.g., `PostgresConfig`, `RedisConfig`, `KafkaConfig`,
-  `HttpConfig`, `GrpcConfig`)
+  configuration modules (e.g., `PostgresModule`, `RedisModule`, `KafkaModule`,
+  `HttpModule`, `GrpcModule`)
 - **FR-015**: Validation failures MUST prevent startup
 - **FR-016**: System MUST support field-level validation (required values,
   numeric ranges, string length, allowed values)
@@ -382,17 +384,20 @@ Applications MAY customize precedence.
   requires retry configuration)
 - **FR-019**: Validation failures MUST provide machine-readable diagnostics
 - **FR-020**: Validation failures MUST provide human-readable diagnostics
-- **FR-021**: Reusable infrastructure configuration models MUST provide
+- **FR-021**: Reusable infrastructure configuration modules MUST provide
   built-in validation
-- **FR-022**: Reusable observability configuration models MUST provide
+- **FR-022**: Reusable observability configuration modules MUST provide
   built-in validation
-- **FR-023**: Reusable runtime configuration models MUST provide built-in
+- **FR-023**: Reusable runtime configuration modules MUST provide built-in
   validation
 - **FR-024**: System MUST support application-level validation (executes
-  after framework validation)
-- **FR-025**: Applications MUST be able to register custom validators
-- **FR-026**: Custom validators MUST execute after framework validation
-- **FR-027**: Custom validators MAY be implemented through traits, functions,
+  after framework validation, before domain validation)
+- **FR-025**: System MUST support domain-level validation for custom
+  configuration extensions (executes last in the pipeline)
+- **FR-026**: Applications MUST be able to register custom validators
+- **FR-027**: Custom validators MUST execute in the correct pipeline stage
+  (application validators after framework, domain validators after application)
+- **FR-028**: Custom validators MAY be implemented through traits, functions,
   closures, or equivalent extension mechanisms
 
 #### Environment Variables
@@ -402,18 +407,25 @@ Applications MAY customize precedence.
 - **FR-029**: System MUST support nested environment variable mapping (e.g.,
   `EGO_LOGGER_LEVEL=debug` maps to `logger.level`)
 
+#### Unknown Fields
+
+- **FR-030**: System MUST reject unknown configuration fields by default
+  (strict mode), causing startup failure
+- **FR-031**: System MUST support a permissive mode, per loader or per module,
+  that logs a warning and ignores unknown fields instead of failing
+
 #### Reusable Models
 
-- **FR-030**: System MUST provide reusable infrastructure configuration
-  structures
-- **FR-031**: System MUST provide reusable observability configuration
-  structures
-- **FR-032**: System MUST provide reusable runtime configuration structures
+- **FR-032**: System MUST provide reusable infrastructure configuration
+  modules
+- **FR-033**: System MUST provide reusable observability configuration
+  modules
+- **FR-034**: System MUST provide reusable runtime configuration modules
 
 #### Extensibility
 
-- **FR-033**: System MUST support custom application configuration extensions
-- **FR-034**: System MUST support future configuration source extensions
+- **FR-035**: System MUST support custom application configuration extensions
+- **FR-036**: System MUST support future configuration source extensions
   (secret providers, remote config) without API redesign
 
 ### Non-Functional Requirements
@@ -454,23 +466,30 @@ Applications MAY customize precedence.
   a read method
 - **ConfigurationProfile**: Represents environment-specific configuration.
   Supported profiles: `local`, `development`, `test`, `staging`, `production`
-- **Infrastructure Configuration Models**: Reusable typed structures for
-  infrastructure components:
-  - `HttpConfig`, `HttpsConfig`, `GrpcConfig`
-  - `PostgresConfig`, `MySqlConfig`, `RedisConfig`
-  - `KafkaConfig`, `RedpandaConfig`, `NatsConfig`, `S3Config`
-- **Observability Configuration Models**: Reusable typed structures for
-  observability:
-  - `LoggerConfig`, `MetricsConfig`, `TracingConfig`, `OpenTelemetryConfig`
-- **Runtime Configuration Models**: Reusable typed structures for operational
-  behavior:
-  - `RetryConfig`, `BackoffConfig`, `CircuitBreakerConfig`, `WorkerPoolConfig`
+- **Infrastructure Configuration Modules**: Reusable modules per infrastructure
+  domain, each bundling a config struct, built-in defaults, validation logic, and
+  helper functions:
+  - `HttpModule`, `HttpsModule`, `GrpcModule`
+  - `PostgresModule`, `MySqlModule`, `RedisModule`
+  - `KafkaModule`, `RedpandaModule`, `NatsModule`, `S3Module`
+- **Observability Configuration Modules**: Reusable modules per observability
+  domain, each bundling a config struct, defaults, validation, and helpers:
+  - `LoggerModule`, `MetricsModule`, `TracingModule`, `OpenTelemetryModule`
+- **Runtime Configuration Modules**: Reusable modules per operational pattern,
+  each bundling a config struct, defaults, validation, and helpers:
+  - `RetryModule`, `BackoffModule`, `CircuitBreakerModule`, `WorkerPoolModule`
 - **FrameworkValidator**: Responsible for validating reusable kit-config
-  configuration models
+  configuration modules. Runs first in the pipeline.
 - **ApplicationValidator**: Responsible for validating application-specific
-  configuration rules
-- **ValidationPipeline**: Coordinates Framework Validation then Application
-  Validation, collecting all errors before returning
+  configuration rules. Runs second, after framework validation completes.
+- **DomainValidator**: Responsible for validating domain-specific
+  configuration extensions. Runs third, after application validation completes.
+- **ValidationReport**: A single data structure returned after all pipeline
+  stages execute, containing all collected errors from every stage with source
+  identification (framework vs application vs domain).
+- **ValidationPipeline**: Ordered pipeline coordinating Framework → Application
+  → Domain validation. All stages always execute; all errors are collected into
+  a single ValidationReport.
 
 ## Success Criteria _(mandatory)_
 
@@ -480,12 +499,12 @@ Applications MAY customize precedence.
   and environment variables
 - **SC-002**: Configuration precedence behaves deterministically — re-running
   with the same sources produces identical results
-- **SC-003**: Applications can reuse infrastructure configuration structures
-  without redefining them
-- **SC-004**: Applications can reuse observability configuration structures
-  without redefining them
-- **SC-005**: Applications can reuse runtime configuration structures without
-  redefining them
+- **SC-003**: Applications can reuse infrastructure configuration modules
+  (struct + defaults + validation + helpers) without redefining them
+- **SC-004**: Applications can reuse observability configuration modules
+  (struct + defaults + validation + helpers) without redefining them
+- **SC-005**: Applications can reuse runtime configuration modules
+  (struct + defaults + validation + helpers) without redefining them
 - **SC-006**: Validation failures prevent startup — a binary with invalid
   config exits with a non-zero code and descriptive error message
 - **SC-007**: Applications can extend configuration with domain-specific
@@ -498,6 +517,28 @@ Applications MAY customize precedence.
   kit-config
 - **SC-011**: The project maintains at least 85% test coverage (line and
   branch)
+
+## Clarifications
+
+### Session 2026-06-09
+
+- Q: Configuration Module Model → A: Option B — Configuration modules. Each reusable
+  infrastructure domain (Postgres, Redis, Kafka, HTTP, etc.) is delivered as a module
+  containing the config struct, built-in defaults, validation logic, and helper
+  functions (e.g., `PostgresModule` with `PostgresConfig`, defaults, `validate()`).
+- Q: Unknown Configuration Fields → A: Option C — Configurable strict/permissive mode,
+  strict by default. Unknown fields cause startup failure unless permissive mode is
+  explicitly enabled per loader or per module.
+- Q: Validation Error Strategy → A: Option B — Collect and report all validation
+  errors. All validators run, all failures are accumulated and returned as a single
+  diagnostic batch. Both framework-level and application-level errors are reported
+  together.
+- Q: Validation Pipeline Model → A: Custom — Ordered validation pipeline:
+  Framework → Application → Domain. All three stages always execute. All errors are
+  collected within each stage. A single `ValidationReport` is returned containing
+  all errors from every stage.
+- Q: Profile Resolution Model → A: Option A — config.toml, config.local.toml, config.dev.toml, config.prod.toml. Environment profiles are organized as individual files in the root configuration directory with profile-specific suffixes.
+- Q: Default Configuration Strategy → A: Required but overridable. Reusable configuration models must provide built-in defaults that are required to be present, but can be overridden by application-specific configuration.
 
 ## Assumptions
 

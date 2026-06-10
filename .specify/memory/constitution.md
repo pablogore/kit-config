@@ -1,94 +1,73 @@
-<!--
-  Sync Impact Report — Constitution v1.0.0
+# [PROJECT_NAME] Constitution
 
-  Version change: (initial) → 1.0.0
-  Modified principles: all placeholders replaced with concrete values for kit-config
-  Added sections: none
-  Removed sections: none
-  Templates requiring updates:
-    - .specify/templates/plan-template.md — ✅ reviewed (Constitution Check section is generic — no change needed)
-    - .specify/templates/spec-template.md — ✅ reviewed (no change needed)
-    - .specify/templates/tasks-template.md — ✅ reviewed (no change needed)
-    - .specify/templates/commands/* — ✅ reviewed (no outdated agent references found)
-  Follow-up TODOs: none
--->
-
-# kit-config Constitution
-
-A configuration management toolkit built with Rust — principles for building,
-validating, and composing configurations programmatically.
+<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
 
 ## Core Principles
 
-### I. Rust-First Development
+### [PRINCIPLE_1_NAME]
 
-All core functionality MUST be implemented in Rust, leveraging its memory safety
-guarantees for configuration parsing, validation, and merging. Dependencies MUST
-be minimized and justified — no dependency should duplicate core Rust standard
-library capabilities. Third-party crates MUST be evaluated for maintenance
-quality, safety record, and semver stability before adoption.
+<!-- Example: I. Library-First -->
 
-### II. Config-as-Code
+[PRINCIPLE_1_DESCRIPTION]
 
-Configurations MUST be declarative, version-controlled, and composed
-programmatically. Users MUST be able to define configurations as code (Rust
-structs, TOML, YAML, or domain-specific DSLs) and compose them via overrides,
-environment variable interpolation, and conditional logic. The system MUST NOT
-require manual merging of configuration files.
+<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
 
-### III. Test-First (NON-NEGOTIABLE)
+### [PRINCIPLE_2_NAME]
 
-TDD is mandatory. Tests MUST be written and verified to fail before
-implementation begins. The Red-Green-Refactor cycle MUST be strictly enforced.
-Every module, parser, validator, and CLI command MUST have unit tests.
-Integration tests MUST cover contract boundaries and cross-module interactions.
+<!-- Example: II. CLI Interface -->
 
-### IV. Schema-Driven Validation
+[PRINCIPLE_2_DESCRIPTION]
 
-Every configuration format MUST have an associated schema (e.g., JSON Schema,
-CUE, or Rust types serving as schema) that defines allowed values, types,
-defaults, and constraints. Validation MUST occur at parse time — invalid
-configurations MUST be rejected with clear, actionable error messages before any
-system state is modified.
+<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
 
-### V. Modularity & Composability
+### [PRINCIPLE_3_NAME]
 
-The system MUST be composed of small, focused modules with single
-responsibilities. Modules MUST expose clear, minimal public APIs. Cross-module
-dependencies MUST be explicit and acyclic. No module may exceed a cognitive
-complexity that justifies extraction — use YAGNI to decide when to extract.
+<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
 
-## Security & Secrets Management
+[PRINCIPLE_3_DESCRIPTION]
 
-Configuration files MUST NOT contain secrets (passwords, API keys, certificates)
-in plain text. The system MUST support environment variable interpolation as the
-primary mechanism for exposing secrets to configs. If secret references via
-external backends (e.g., vaults) are supported, they MUST require explicit
-opt-in. All file read operations MUST validate permissions and path safety —
-directory traversal MUST be rejected.
+<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
 
-## Development Workflow & Quality Gates
+### [PRINCIPLE_4_NAME]
 
-All feature work MUST follow the /spec workflow: specify → clarify → checklist →
-plan → tasks → implement → analyze. Feature branches MUST use the
-`###-feature-name` convention. No PR may merge without passing the Constitution
-Check gate — all principles MUST be respected. CI MUST run the full test suite,
-clippy linting, and a dependency audit (`cargo audit` or equivalent).
-Complexity MUST be justified in the plan's Complexity Tracking section;
-unjustified complexity is a merge blocker.
+<!-- Example: IV. Integration Testing -->
+
+[PRINCIPLE_4_DESCRIPTION]
+
+<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+
+### [PRINCIPLE_5_NAME]
+
+<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
+
+[PRINCIPLE_5_DESCRIPTION]
+
+<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+
+## [SECTION_2_NAME]
+
+<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+
+[SECTION_2_CONTENT]
+
+<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+
+## [SECTION_3_NAME]
+
+<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+
+[SECTION_3_CONTENT]
+
+<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
 
 ## Governance
 
-This constitution supersedes all other process guidance. Amendments require:
-(1) documented rationale, (2) approval from the project maintainer, (3) a
-migration plan for any existing work that conflicts with the change.
+<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-The version follows semver:
+[GOVERNANCE_RULES]
 
-- **MAJOR**: incompatible principle removals or redefinitions
-- **MINOR**: new principles or materially expanded guidance
-- **PATCH**: clarifications, wording, typo fixes, non-semantic refinements
+<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
 
-All PRs and reviews MUST verify constitution compliance.
+**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
 
-**Version**: 1.0.0 | **Ratified**: 2026-06-09 | **Last Amended**: 2026-06-09
+<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->

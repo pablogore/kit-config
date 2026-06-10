@@ -1,1 +1,21 @@
-/target
+# Rust
+/target/
+/.cargo/
+*.rs.bk
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+*.tmp
+
+# Build artifacts
+*.log
+.env*
+*.tmp
