@@ -230,3 +230,89 @@ impl Default for EnvironmentSource {
         Self::new(None)
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct YamlFileSource {
+    path: String,
+    optional: bool,
+}
+
+impl YamlFileSource {
+    pub fn new<P: Into<String>>(path: P, optional: bool) -> Self {
+        Self { path: path.into(), optional }
+    }
+}
+
+impl ConfigurationSource for YamlFileSource {
+    fn name(&self) -> &'static str {
+        "yaml"
+    }
+
+    fn priority(&self) -> u8 {
+        200
+    }
+
+    fn is_optional(&self) -> bool {
+        self.optional
+    }
+
+    fn load(&self) -> Result<Value, ConfigError> {
+        match fs::read_to_string(&self.path) {
+            Ok(content) => {
+                let value: Value = serde_yml::from_str(&content)
+                    .map_err(|e| ConfigError::SourceError(format!("Failed to parse YAML file {}: {}", self.path, e)))?;
+                Ok(value)
+            }
+            Err(e) => {
+                if self.optional {
+                    Ok(Value::Object(serde_json::Map::new()))
+                } else {
+                    Err(ConfigError::SourceError(format!("Failed to read YAML file {}: {}", self.path, e)))
+                }
+            }
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct JsonFileSource {
+    path: String,
+    optional: bool,
+}
+
+impl JsonFileSource {
+    pub fn new<P: Into<String>>(path: P, optional: bool) -> Self {
+        Self { path: path.into(), optional }
+    }
+}
+
+impl ConfigurationSource for JsonFileSource {
+    fn name(&self) -> &'static str {
+        "json"
+    }
+
+    fn priority(&self) -> u8 {
+        200
+    }
+
+    fn is_optional(&self) -> bool {
+        self.optional
+    }
+
+    fn load(&self) -> Result<Value, ConfigError> {
+        match fs::read_to_string(&self.path) {
+            Ok(content) => {
+                let value: Value = serde_json::from_str(&content)
+                    .map_err(|e| ConfigError::SourceError(format!("Failed to parse JSON file {}: {}", self.path, e)))?;
+                Ok(value)
+            }
+            Err(e) => {
+                if self.optional {
+                    Ok(Value::Object(serde_json::Map::new()))
+                } else {
+                    Err(ConfigError::SourceError(format!("Failed to read JSON file {}: {}", self.path, e)))
+                }
+            }
+        }
+    }
+}
