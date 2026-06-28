@@ -25,6 +25,16 @@ impl ConfigLoaderBuilder {
         self
     }
 
+    pub fn add_yaml(mut self, file_path: impl Into<String>) -> Self {
+        self.sources.push(Box::new(crate::sources::YamlFileSource::new(file_path, false)));
+        self
+    }
+
+    pub fn add_json(mut self, file_path: impl Into<String>) -> Self {
+        self.sources.push(Box::new(crate::sources::JsonFileSource::new(file_path, false)));
+        self
+    }
+
     pub fn add_dotenv(mut self, file_path: impl Into<String>) -> Self {
         self.sources.push(Box::new(crate::sources::DotenvSource::new(file_path, false)));
         self
