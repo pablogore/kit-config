@@ -53,7 +53,7 @@ This avoids pulling in file I/O, environment parsing, and `toml` dependencies fr
 
 | Feature | Provides | Implies |
 |---------|----------|---------|
-| `config-core` | `ConfigError`, `Validation`, `ConfigurationSource`, `ConfigModule`, `ConfigurationProfile` | — |
+| `config-core` | `ConfigError`, `Validation`, `ConfigurationSource`, `ConfigModule` | — |
 | `config-models` | `LoggingConfig`, infra modules (`GrpcModule`, `HttpModule`, etc.) | `config-core` |
 | `config-loaders` | `ConfigLoader`, sources (TOML, dotenv, env, cloud), `AwsSource`, `GcpSource` | `config-core` |
 
