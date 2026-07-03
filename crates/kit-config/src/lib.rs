@@ -42,10 +42,6 @@
 pub use config_core::errors;
 #[cfg(feature = "config-core")]
 pub use config_core::validation;
-#[cfg(feature = "config-core")]
-pub use config_core::profile;
-#[cfg(feature = "config-core")]
-pub use config_core::extension;
 
 #[cfg(feature = "config-loaders")]
 pub use config_loaders::loader;
@@ -58,11 +54,11 @@ pub mod sources;
 pub mod modules;
 
 #[cfg(feature = "config-core")]
-pub use config_core::{ConfigError, ConfigurationSource, ConfigurationProfile};
+pub use config_core::{ConfigError, ConfigurationSource};
 #[cfg(feature = "config-core")]
 pub use config_core::{Validation, ValidationReport, ValidationError};
 #[cfg(feature = "config-core")]
-pub use config_core::{ConfigModule, Extension};
+pub use config_core::ConfigModule;
 
 #[cfg(feature = "config-loaders")]
 pub use config_loaders::loader::ConfigLoader;
