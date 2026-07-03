@@ -281,6 +281,8 @@ impl Default for LoggingConfig {
 }
 
 impl ConfigModule for LoggingConfig {
+    const NAME: &'static str = "logging";
+
     fn defaults() -> Self {
         Self::default()
     }
@@ -729,5 +731,10 @@ logging:
     fn test_config_module_trait() {
         let config = LoggingConfig::defaults();
         assert!(config.enabled);
+    }
+
+    #[test]
+    fn test_config_module_name() {
+        assert_eq!(LoggingConfig::NAME, "logging");
     }
 }
