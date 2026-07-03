@@ -1,4 +1,4 @@
-use config_core::Validation;
+use config_core::{ConfigModule, Validation};
 
 #[derive(Debug, serde::Deserialize, serde::Serialize, Clone)]
 pub struct RedisModule {
@@ -7,8 +7,10 @@ pub struct RedisModule {
     pub tls_enabled: bool,
 }
 
-impl RedisModule {
-    pub fn defaults() -> Self {
+impl ConfigModule for RedisModule {
+    const NAME: &'static str = "redis";
+
+    fn defaults() -> Self {
         Self {
             connection_string: "redis://localhost:6379".to_string(),
             pool_size: 5,
@@ -34,5 +36,15 @@ impl Validation for RedisModule {
         } else {
             Err(report)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_config_module_name() {
+        assert_eq!(RedisModule::NAME, "redis");
     }
 }

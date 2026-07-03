@@ -1,4 +1,4 @@
-use config_core::Validation;
+use config_core::{ConfigModule, Validation};
 
 #[derive(Debug, serde::Deserialize, serde::Serialize, Clone)]
 pub struct HttpModule {
@@ -9,8 +9,10 @@ pub struct HttpModule {
     pub tls_key_path: Option<String>,
 }
 
-impl HttpModule {
-    pub fn defaults() -> Self {
+impl ConfigModule for HttpModule {
+    const NAME: &'static str = "http";
+
+    fn defaults() -> Self {
         Self {
             host: "0.0.0.0".to_string(),
             port: 8080,
@@ -58,8 +60,10 @@ pub struct HttpsModule {
     pub key_path: String,
 }
 
-impl HttpsModule {
-    pub fn defaults() -> Self {
+impl ConfigModule for HttpsModule {
+    const NAME: &'static str = "https";
+
+    fn defaults() -> Self {
         Self {
             host: "0.0.0.0".to_string(),
             port: 8443,
@@ -94,5 +98,20 @@ impl Validation for HttpsModule {
         } else {
             Err(report)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_http_config_module_name() {
+        assert_eq!(HttpModule::NAME, "http");
+    }
+
+    #[test]
+    fn test_https_config_module_name() {
+        assert_eq!(HttpsModule::NAME, "https");
     }
 }
