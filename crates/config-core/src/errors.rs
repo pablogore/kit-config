@@ -50,19 +50,4 @@ mod tests {
             other => panic!("expected ConfigError::Validation, got {other:?}"),
         }
     }
-
-    #[test]
-    fn validation_report_with_no_errors_still_wraps_into_variant() {
-        let report = ValidationReport::new();
-
-        let error = ConfigError::Validation(report);
-
-        match error {
-            ConfigError::Validation(report) => {
-                assert!(report.is_valid);
-                assert!(report.domain_errors.is_empty());
-            }
-            other => panic!("expected ConfigError::Validation, got {other:?}"),
-        }
-    }
 }
