@@ -1,4 +1,4 @@
-use config_core::Validation;
+use config_core::{ConfigModule, Validation};
 
 #[derive(Debug, serde::Deserialize, serde::Serialize, Clone)]
 pub struct GrpcModule {
@@ -11,8 +11,10 @@ pub struct GrpcModule {
     pub keepalive_timeout: Option<u32>,
 }
 
-impl GrpcModule {
-    pub fn defaults() -> Self {
+impl ConfigModule for GrpcModule {
+    const NAME: &'static str = "grpc";
+
+    fn defaults() -> Self {
         Self {
             host: "0.0.0.0".to_string(),
             port: 50051,
@@ -75,8 +77,10 @@ pub struct GrpcClientModule {
     pub keepalive_timeout: Option<u32>,
 }
 
-impl GrpcClientModule {
-    pub fn defaults() -> Self {
+impl ConfigModule for GrpcClientModule {
+    const NAME: &'static str = "grpc-client";
+
+    fn defaults() -> Self {
         Self {
             target: "localhost:50051".to_string(),
             tls_enabled: false,
@@ -112,5 +116,20 @@ impl Validation for GrpcClientModule {
         } else {
             Err(report)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_grpc_config_module_name() {
+        assert_eq!(GrpcModule::NAME, "grpc");
+    }
+
+    #[test]
+    fn test_grpc_client_config_module_name() {
+        assert_eq!(GrpcClientModule::NAME, "grpc-client");
     }
 }

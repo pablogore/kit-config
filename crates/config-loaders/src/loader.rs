@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use config_core::ConfigurationSource;
 use config_core::ConfigError;
+use config_core::Validation;
 use serde_json::Value;
 
 pub struct ConfigLoaderBuilder {
@@ -118,7 +119,7 @@ impl ConfigLoader {
 
     pub fn load_and_validate<T>(&self) -> Result<T, ConfigError>
     where
-        T: serde::de::DeserializeOwned,
+        T: serde::de::DeserializeOwned + Validation,
     {
         let config_map = self.load()?;
 
@@ -127,6 +128,8 @@ impl ConfigLoader {
 
         let config: T = serde_json::from_str(&config_json)
             .map_err(|e| ConfigError::SerializationError(format!("Failed to deserialize config: {}", e)))?;
+
+        config.validate().map_err(ConfigError::Validation)?;
 
         Ok(config)
     }

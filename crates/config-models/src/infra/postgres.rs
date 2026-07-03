@@ -1,4 +1,4 @@
-use config_core::Validation;
+use config_core::{ConfigModule, Validation};
 
 #[derive(Debug, serde::Deserialize, serde::Serialize, Clone)]
 pub struct PostgresModule {
@@ -7,8 +7,10 @@ pub struct PostgresModule {
     pub ssl_mode: String,
 }
 
-impl PostgresModule {
-    pub fn defaults() -> Self {
+impl ConfigModule for PostgresModule {
+    const NAME: &'static str = "postgres";
+
+    fn defaults() -> Self {
         Self {
             connection_string: "postgresql://localhost/postgres".to_string(),
             pool_size: 10,
@@ -39,5 +41,15 @@ impl Validation for PostgresModule {
         } else {
             Err(report)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_config_module_name() {
+        assert_eq!(PostgresModule::NAME, "postgres");
     }
 }

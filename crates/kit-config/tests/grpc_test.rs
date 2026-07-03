@@ -1,3 +1,4 @@
+use config_core::ConfigModule;
 use kit_config::modules::infra::grpc::{GrpcModule, GrpcClientModule};
 use kit_config::validation::Validation;
 
