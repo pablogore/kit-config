@@ -3,6 +3,12 @@ name = "config-loaders"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+aws = []
+gcp = []
+digitalocean = []
+cloud = ["aws", "gcp", "digitalocean"]
+
 [dependencies]
 config-core = { path = "../config-core" }
 serde = { version = "1.0", features = ["derive"] }
