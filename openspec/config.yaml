@@ -1,0 +1,83 @@
+schema: spec-driven
+
+context: |
+  Tech stack: Rust Cargo workspace (resolver "2", edition 2024). Root Cargo.toml
+  lists 4 members: crates/config-core, crates/config-models, crates/config-loaders,
+  crates/kit-config.
+    - config-core: base crate, deps serde/serde_json/thiserror, defines `Extension`
+      trait (extension.rs) and `ConfigurationProfile` (profile.rs). No dev-deps, no
+      tests, no Cargo features.
+    - config-models: depends only on config-core; dev-dep serde_yaml; contains
+      logging.rs (implements ConfigModule) and infra/* (Http/Postgres/Redis/gRPC —
+      do NOT implement ConfigModule).
+    - config-loaders: depends only on config-core; toml parsing; includes cloud.rs
+      (aws/gcp/digitalocean loaders always compiled in, no opt-out). No Cargo
+      features.
+    - kit-config: umbrella crate, feature-gated (config-core, config-models,
+      config-loaders features map to dep: optionals, default = all three);
+      dev-deps tempfile + serde_json; has tests/ dir (dotenv_test.rs,
+      grpc_test.rs, toml_test.rs).
+  Dependency graph is clean: config-models and config-loaders both depend only on
+  config-core, no cross-deps, no cycles.
+
+  Architecture: Workspace-based configuration platform, result of a recent
+  refactor (commit 15ab1d7) that split a single crate into
+  config-core/config-models/config-loaders/kit-config. Related commits: d65366a
+  (logging config framework), b86479e (feature flags for selective crate
+  imports), 3449653 (docs update for feature-flag imports).
+  KIT-001 architecture proposal is in flight, addressing ambiguity between
+  ConfigModule, Extension, and ConfigurationProfile. Known issues (see Engram
+  observation architecture/kit-config-audit, id 1062, and sdd-init/kit-config,
+  id 1063, for full detail — do not re-derive):
+    - `Extension` trait (config-core/src/extension.rs) has zero implementations
+      anywhere in the workspace — dead hexagonal port.
+    - `ConfigurationProfile` (config-core/src/profile.rs) is defined/re-exported
+      but never consumed — unused domain type.
+    - `ConfigModule` trait adoption is inconsistent: only LoggingConfig
+      implements it; infra modules (Http/Postgres/Redis/gRPC in
+      config-models/src/infra/) do not.
+    - No Cargo features defined in config-core or config-loaders (only
+      kit-config has features); the config-models feature (via kit-config) is
+      coarse, pulling in unrelated infra types alongside logging.
+    - `specs/001-config-001-configuration/*` no longer exists in the working
+      tree (confirmed — stale/pre-refactor, never tracked at HEAD). Treat
+      openspec/specs/ as greenfield; do not assume prior spec files exist.
+    - `.gitlab-ci.yml` governance stage references missing
+      scripts/governance/gov — CI is broken.
+    - Stray tracked file debug_dotenv.rs at repo root, not a workspace member,
+      dead debug code.
+    - No CHANGELOG, no LICENSE, no .github/workflows.
+
+  Testing: `cargo test --workspace` — CONFIRMED WORKING (4 grpc tests, 1 toml
+  test, doctests all pass; dotenv_test.rs also present). Only
+  crates/kit-config/tests/ has integration tests; config-core, config-models,
+  config-loaders have no dedicated test files. No coverage tool configured
+  (no tarpaulin/llvm-cov). Strict TDD is ACTIVE for this project.
+
+  Style: rustfmt.toml and clippy.toml present at root (formatter/linter
+  configured) — use `cargo fmt` and `cargo clippy` as quality gates.
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Address the ConfigModule/Extension/ConfigurationProfile ambiguity explicitly when relevant (see KIT-001)
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+    - Treat openspec/specs/ as greenfield — no prior specs exist to reconcile against
+  design:
+    - Include sequence diagrams for complex flows
+    - Document architecture decisions with rationale
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+  apply:
+    - Follow existing code patterns (workspace crate boundaries: config-core has no deps on other workspace crates; config-models/config-loaders depend only on config-core)
+    tdd: true           # Strict TDD is active for this project
+    test_command: "cargo test --workspace"
+  verify:
+    test_command: "cargo test --workspace"
+    build_command: "cargo build --workspace"
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas
