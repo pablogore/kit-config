@@ -1,0 +1,17 @@
+change: kit-001
+artifact_store: hybrid
+phases:
+  explore: skipped
+  proposal: done
+  spec: done
+  design: done
+  tasks: done
+  apply: done
+  verify: done
+  archive: done
+next_recommended: none
+notes: |
+  Change archived 2026-07-03.
+  All 4 implementation slices (PRs #3-#7) merged to master.
+  Verification: PASS with 0 CRITICAL, 0 WARNING, 4 SUGGESTION (process hygiene).
+  Specs merged into openspec/specs/kit-config/spec.md (main spec source of truth).

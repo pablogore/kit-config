@@ -112,3 +112,4 @@ Pre-1.0 (0.1.0): breaking facade feature rename is acceptable. Removing `Extensi
 
 - [ ] Which official modules implement `ConfigModule` (add `NAME`) vs. `Validation`-only — deferred to Spec.
 - [ ] Keep back-compat aliases for old `config-models` bundled feature, or hard-break.
+- [ ] `ConfigError::Validation(ValidationReport)` is publicly constructible with an `is_valid: true` report, a domain-invalid state. Future improvement: encapsulate via a smart constructor (e.g. `ConfigError::validation(report)` with a `debug_assert!(!report.is_valid)`) or a report type that only exists when errors are present. Not a regression (the enum was already public) and out of scope for KIT-001's slices — `load_and_validate()` never constructs this state in practice.
