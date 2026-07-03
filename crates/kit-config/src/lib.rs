@@ -22,8 +22,9 @@
 //!     .unwrap();
 //! ```
 //!
-//! Cloud provider usage:
-//! ```
+//! Cloud provider usage (requires `--features aws,digitalocean` or `--features cloud`,
+//! neither of which is enabled by default):
+//! ```ignore
 //! use kit_config::loader::ConfigLoader;
 //!
 //! let config = ConfigLoader::builder()
@@ -62,10 +63,14 @@ pub use config_core::ConfigModule;
 
 #[cfg(feature = "config-loaders")]
 pub use config_loaders::loader::ConfigLoader;
-#[cfg(feature = "config-loaders")]
-pub use config_loaders::cloud::{AwsSource, DigitalOceanSource, GcpSource};
+#[cfg(feature = "aws")]
+pub use config_loaders::cloud::AwsSource;
+#[cfg(feature = "digitalocean")]
+pub use config_loaders::cloud::DigitalOceanSource;
+#[cfg(feature = "gcp")]
+pub use config_loaders::cloud::GcpSource;
 
-#[cfg(feature = "config-models")]
+#[cfg(feature = "logging")]
 pub use config_models::logging::{
     LoggingConfig, LogLevel, LogFormat, OutputTarget, OutputConfig,
     TimestampConfig, TimestampFormat, CorrelationConfig, StructuredConfig,

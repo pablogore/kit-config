@@ -4,10 +4,32 @@ version = "0.1.0"
 edition = "2024"
 
 [features]
-default = ["config-core", "config-models", "config-loaders"]
+default = ["config-loaders", "logging"]
+
+# Base crate-forwarding features
 config-core = ["dep:config-core"]
-config-models = ["dep:config-models", "config-core"]
 config-loaders = ["dep:config-loaders", "config-core"]
+
+# Per-domain features (config-models)
+logging = ["dep:config-models", "config-models?/logging", "config-core"]
+postgres = ["dep:config-models", "config-models?/postgres", "config-core"]
+redis = ["dep:config-models", "config-models?/redis", "config-core"]
+http = ["dep:config-models", "config-models?/http", "config-core"]
+grpc = ["dep:config-models", "config-models?/grpc", "config-core"]
+database = ["postgres", "redis"]
+
+config-models = ["logging", "postgres", "redis", "http", "grpc"]
+
+# Per-provider features (config-loaders cloud sources)
+# Note: weak (`?/`) dep-feature syntax is required here (and above for config-models)
+# because "config-loaders"/"config-models" are simultaneously optional dependency
+# names AND locally-defined feature names; strong `dep_name/feature` syntax on a
+# name that collides with a local feature causes Cargo to also activate that local
+# feature (and everything it forwards to), silently over-activating the graph.
+aws = ["dep:config-loaders", "config-loaders?/aws", "config-core"]
+gcp = ["dep:config-loaders", "config-loaders?/gcp", "config-core"]
+digitalocean = ["dep:config-loaders", "config-loaders?/digitalocean", "config-core"]
+cloud = ["aws", "gcp", "digitalocean"]
 
 [dependencies]
 config-core = { path = "../config-core", optional = true }
@@ -17,3 +39,8 @@ config-loaders = { path = "../config-loaders", optional = true }
 [dev-dependencies]
 tempfile = "3.0"
 serde_json = "1.0"
+
+[[test]]
+name = "grpc_test"
+path = "tests/grpc_test.rs"
+required-features = ["grpc"]

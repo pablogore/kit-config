@@ -36,7 +36,15 @@ kit-config/                    (workspace root)
 kit-config = "0.1"
 ```
 
-Default features include everything. All public types are re-exported through the facade. No need to track internal crate boundaries.
+**Breaking change (pre-1.0):** `default = ["config-loaders", "logging"]` — only the loader
+infrastructure and the `logging` domain are enabled by default. Every other domain
+(`postgres`, `redis`, `http`, `grpc`) and every cloud provider (`aws`, `gcp`,
+`digitalocean`) is opt-in. Enable exactly what your application needs:
+
+```toml
+[dependencies]
+kit-config = { version = "0.1", features = ["database", "aws"] }
+```
 
 ### Ecosystem crates (selective imports)
 
@@ -44,18 +52,34 @@ For crates that only need configuration contracts (e.g. kit-logger, ego-rs), dis
 
 ```toml
 [dependencies]
-kit-config = { version = "0.1", default-features = false, features = ["config-core", "config-models"] }
+kit-config = { version = "0.1", default-features = false, features = ["config-core"] }
 ```
 
-This avoids pulling in file I/O, environment parsing, and `toml` dependencies from `config-loaders`.
+This avoids pulling in file I/O, environment parsing, and `toml` dependencies from `config-loaders`, and avoids compiling any domain model you don't use.
 
 ### Feature reference
 
 | Feature | Provides | Implies |
 |---------|----------|---------|
 | `config-core` | `ConfigError`, `Validation`, `ConfigurationSource`, `ConfigModule` | — |
-| `config-models` | `LoggingConfig`, infra modules (`GrpcModule`, `HttpModule`, etc.) | `config-core` |
-| `config-loaders` | `ConfigLoader`, sources (TOML, dotenv, env, cloud), `AwsSource`, `GcpSource` | `config-core` |
+| `config-loaders` | `ConfigLoader`, sources (TOML, dotenv, env) | `config-core` |
+| `logging` | `LoggingConfig` and related types | `config-core` |
+| `postgres` | `PostgresModule` | `config-core` |
+| `redis` | `RedisModule` | `config-core` |
+| `http` | `HttpModule`, `HttpsModule` | `config-core` |
+| `grpc` | `GrpcModule`, `GrpcClientModule` | `config-core` |
+| `database` | `postgres` + `redis` | `config-core` |
+| `config-models` | back-compat umbrella: `logging` + `postgres` + `redis` + `http` + `grpc` | `config-core` |
+| `aws` | `AwsSource` | `config-core`, `config-loaders` |
+| `gcp` | `GcpSource` | `config-core`, `config-loaders` |
+| `digitalocean` | `DigitalOceanSource` | `config-core`, `config-loaders` |
+| `cloud` | `aws` + `gcp` + `digitalocean` | `config-core`, `config-loaders` |
+
+Minimal build (no domains, no loaders — just the `ConfigModule`/`Validation`/`ConfigError` traits):
+
+```toml
+kit-config = { version = "0.1", default-features = false, features = ["config-core"] }
+```
 
 ## Key Features
 

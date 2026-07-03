@@ -1,21 +1,29 @@
+#[cfg(any(feature = "aws", feature = "gcp", feature = "digitalocean"))]
 use std::collections::HashMap;
+#[cfg(any(feature = "aws", feature = "gcp", feature = "digitalocean"))]
 use std::env;
+#[cfg(any(feature = "aws", feature = "gcp", feature = "digitalocean"))]
 use serde_json::Value;
 
+#[cfg(any(feature = "aws", feature = "gcp", feature = "digitalocean"))]
 use config_core::ConfigurationSource;
+#[cfg(any(feature = "aws", feature = "gcp", feature = "digitalocean"))]
 use config_core::ConfigError;
 
+#[cfg(feature = "aws")]
 #[derive(Debug, Clone)]
 pub struct AwsSource {
     optional: bool,
 }
 
+#[cfg(feature = "aws")]
 impl AwsSource {
     pub fn new(optional: bool) -> Self {
         Self { optional }
     }
 }
 
+#[cfg(feature = "aws")]
 impl ConfigurationSource for AwsSource {
     fn name(&self) -> &'static str {
         "aws"
@@ -60,17 +68,20 @@ impl ConfigurationSource for AwsSource {
     }
 }
 
+#[cfg(feature = "digitalocean")]
 #[derive(Debug, Clone)]
 pub struct DigitalOceanSource {
     optional: bool,
 }
 
+#[cfg(feature = "digitalocean")]
 impl DigitalOceanSource {
     pub fn new(optional: bool) -> Self {
         Self { optional }
     }
 }
 
+#[cfg(feature = "digitalocean")]
 impl ConfigurationSource for DigitalOceanSource {
     fn name(&self) -> &'static str {
         "digitalocean"
@@ -103,17 +114,20 @@ impl ConfigurationSource for DigitalOceanSource {
     }
 }
 
+#[cfg(feature = "gcp")]
 #[derive(Debug, Clone)]
 pub struct GcpSource {
     optional: bool,
 }
 
+#[cfg(feature = "gcp")]
 impl GcpSource {
     pub fn new(optional: bool) -> Self {
         Self { optional }
     }
 }
 
+#[cfg(feature = "gcp")]
 impl ConfigurationSource for GcpSource {
     fn name(&self) -> &'static str {
         "gcp"
@@ -150,6 +164,7 @@ impl ConfigurationSource for GcpSource {
     }
 }
 
+#[cfg(any(feature = "aws", feature = "gcp", feature = "digitalocean"))]
 fn parse_key_value_map(map_str: &str) -> Result<HashMap<String, Value>, ConfigError> {
     let mut map = HashMap::new();
 

@@ -46,16 +46,19 @@ impl ConfigLoaderBuilder {
         self
     }
 
+    #[cfg(feature = "aws")]
     pub fn add_aws(mut self, optional: bool) -> Self {
         self.sources.push(Box::new(crate::cloud::AwsSource::new(optional)));
         self
     }
 
+    #[cfg(feature = "digitalocean")]
     pub fn add_digitalocean(mut self, optional: bool) -> Self {
         self.sources.push(Box::new(crate::cloud::DigitalOceanSource::new(optional)));
         self
     }
 
+    #[cfg(feature = "gcp")]
     pub fn add_gcp(mut self, optional: bool) -> Self {
         self.sources.push(Box::new(crate::cloud::GcpSource::new(optional)));
         self
